@@ -1,0 +1,64 @@
+# PowProducts Source Registry
+
+# Sources owned by powproducts
+
+sources:
+  - source_id: robotshop_uk
+    name: RobotShop UK
+    category: marketplace
+    access: public_scrape
+    status: open
+    cadence: 6h
+    rights_status: open
+    notes: "Robot components, JSON-LD extraction"
+    collector: powproducts.collectors.robotshop
+
+  - source_id: pci_ids
+    name: PCI ID Repository
+    category: hardware_identity
+    access: public_download
+    status: open
+    cadence: weekly
+    rights_status: open
+    notes: "Vendor/device/class IDs for GPU, NIC, accelerator identity"
+    collector: null  # planned
+
+  - source_id: oshwa
+    name: OSHWA Certification Directory
+    category: hardware_identity
+    access: public_api
+    status: open
+    cadence: weekly
+    rights_status: open
+    notes: "Open source hardware certifications"
+    collector: null  # planned
+
+  - source_id: robotis_dynamixel
+    name: ROBOTIS DYNAMIXEL e-Manual
+    category: actuator_specs
+    access: public_docs
+    status: open
+    cadence: weekly
+    rights_status: open
+    notes: "Actuator specs, lifecycle, replacement relationships"
+    collector: null  # planned
+
+  - source_id: blender_open_data
+    name: Blender Open Data
+    category: benchmarks
+    access: public_download
+    status: open
+    cadence: weekly
+    rights_status: open
+    notes: "CPU/GPU benchmark results"
+    collector: null  # planned
+
+  - source_id: mlperf
+    name: MLPerf Inference
+    category: benchmarks
+    access: public_github
+    status: open
+    cadence: weekly
+    rights_status: open
+    notes: "AI inference benchmark results"
+    collector: null  # planned

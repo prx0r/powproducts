@@ -1,0 +1,60 @@
+# Layer 1 Source Manifest — RobotShop UK
+
+id: robotshop_uk
+name: RobotShop UK
+layer: 1
+garden: powproducts
+
+answers:
+  - what_cost?
+  - what_component?
+
+source:
+  authority: RobotShop UK
+  type: web_scrape
+  url: https://uk.robotshop.com
+  format: html_jsonld
+
+rights:
+  access_type: public_scrape
+  licence: proprietary
+  terms_url_ref: https://uk.robotshop.com/terms
+  raw_retention: respect_robots_txt
+  normalized_retention: indefinite
+  derivatives: allowed
+  redistribution: restricted
+  commercial_use: unknown
+  automated_access: implicit_public_scrape
+  status: open
+  reviewed_at: "2026-09-21"
+  notes: "JSON-LD extraction from public search results. No official API."
+
+collection:
+  cadence: 6h
+  backfill_from: null
+  method: http_get
+  parser: robotshop_web_v1
+
+storage:
+  raw: true
+  append_only: true
+  content_addressed: true
+  schema: source_record
+
+time:
+  source_timestamp_field: null
+  observed_at: true
+  append_only: true
+
+health:
+  expected_min_rows: 20
+  max_staleness_hours: 24
+  required_fields:
+    - sku
+    - name
+    - price
+
+export:
+  k1_format: true
+  node_kind: listing
+  observation_metric: price

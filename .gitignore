@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+warehouse/*.db
+warehouse/raw/
+warehouse/.gitkeep
+*.egg-info/
+dist/
+build/
+.env

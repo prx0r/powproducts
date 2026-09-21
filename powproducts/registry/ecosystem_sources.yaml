@@ -1,0 +1,140 @@
+# PowProducts Ecosystem Sources
+
+# Sources discovered across all POW systems
+
+sources:
+  # Component Distributors
+  - source_id: mouser
+    name: Mouser Electronics
+    owner_system: powproducts
+    category: component_distributor
+    access: api_key_required
+    status: permission_required
+    why_it_matters: "Stock, lead time, lifecycle, suggested replacement, pricing"
+    historical_depth: current
+    ephemeral: true
+    rights_status: api_terms
+    notes: "30 calls/min, 1000 calls/day free"
+
+  - source_id: tme
+    name: TME
+    owner_system: powproducts
+    category: component_distributor
+    access: api_key_required
+    status: permission_required
+    why_it_matters: "UK/European robotics/electronics, stock, delivery times"
+    historical_depth: current
+    ephemeral: true
+    rights_status: api_terms
+    notes: "API v2.0, good for European parts"
+
+  - source_id: digikey
+    name: DigiKey
+    owner_system: powproducts
+    category: component_distributor
+    access: api_key_required
+    status: permission_required
+    why_it_matters: "MPN, stock, pricing, substitutions, technical parameters"
+    historical_depth: current
+    ephemeral: true
+    rights_status: api_terms
+    notes: "Product Information API v4"
+
+  - source_id: farnell
+    name: Farnell / element14
+    owner_system: powproducts
+    category: component_distributor
+    access: api_key_required
+    status: permission_required
+    why_it_matters: "UK-market component reference"
+    historical_depth: current
+    ephemeral: true
+    rights_status: api_terms
+    notes: "element14 Product Search API"
+
+  - source_id: partsdb
+    name: PartsDB
+    owner_system: powproducts
+    category: component_cross_reference
+    access: api_key_required
+    status: permission_required
+    why_it_matters: "Component cross-references"
+    historical_depth: current
+    ephemeral: true
+    rights_status: api_terms
+    notes: "Free, 100 req/day"
+
+  # Robotics Identity
+  - source_id: robot_descriptions
+    name: robot_descriptions.py
+    owner_system: powproducts
+    category: robot_identity
+    access: public_github
+    status: open
+    why_it_matters: "190+ robot URDF/MJCF descriptions"
+    historical_depth: static
+    ephemeral: false
+    rights_status: mixed_licences
+    notes: "Preserve per-model licences"
+
+  - source_id: mujoco_menagerie
+    name: MuJoCo Menagerie
+    owner_system: powproducts
+    category: robot_identity
+    access: public_github
+    status: open
+    why_it_matters: "Curated robot models, arms, grippers, quadrupeds"
+    historical_depth: static
+    ephemeral: false
+    rights_status: mixed_licences
+    notes: "Preserve per-model licences"
+
+  # Repair
+  - source_id: open_repair
+    name: Open Repair
+    owner_system: repair
+    category: repair_data
+    access: public_data
+    status: open
+    why_it_matters: "305K repair records"
+    historical_depth: years
+    ephemeral: false
+    rights_status: open
+    notes: "repair owns this"
+
+  # Market
+  - source_id: ebay_gb
+    name: eBay UK
+    owner_system: powproducts
+    category: marketplace
+    access: api_key_required
+    status: permission_required
+    why_it_matters: "UK marketplace prices, official Browse API"
+    historical_depth: current
+    ephemeral: true
+    rights_status: api_terms
+    notes: "Blocked from VPS, needs official API"
+
+  - source_id: jawa
+    name: Jawa
+    owner_system: powproducts
+    category: marketplace
+    access: public_scrape
+    status: terms_review
+    why_it_matters: "Realized GPU/CPU/PC component prices"
+    historical_depth: months
+    ephemeral: true
+    rights_status: terms_review
+    notes: "US-heavy, automation disabled until review"
+
+  - source_id: cex
+    name: CeX
+    owner_system: powproducts
+    category: marketplace
+    access: blocked
+    status: blocked
+    why_it_matters: "UK second-hand, dealer bid/ask"
+    historical_depth: years
+    ephemeral: true
+    rights_status: blocked
+    notes: "403 from VPS"
