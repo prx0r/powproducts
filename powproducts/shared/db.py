@@ -86,22 +86,6 @@ CREATE TABLE IF NOT EXISTS observation (
     FOREIGN KEY (source_record_id) REFERENCES source_record(source_record_id)
 );
 
--- Derived facts
-CREATE TABLE IF NOT EXISTS derived_fact (
-    derived_id TEXT PRIMARY KEY,
-    source_id TEXT,
-    entity_id TEXT,
-    metric TEXT NOT NULL,
-    value TEXT,
-    method_id TEXT,
-    method_version TEXT,
-    input_observation_ids TEXT,
-    confidence REAL,
-    computed_at TEXT NOT NULL DEFAULT (datetime('now')),
-    valid_from TEXT,
-    valid_to TEXT
-);
-
 -- Source cursors (for resumable backfill)
 CREATE TABLE IF NOT EXISTS source_cursor (
     source_id TEXT NOT NULL,
@@ -363,7 +347,6 @@ CREATE INDEX IF NOT EXISTS idx_source_record_retrieved ON source_record(retrieve
 CREATE INDEX IF NOT EXISTS idx_observation_source ON observation(source_id);
 CREATE INDEX IF NOT EXISTS idx_observation_entity ON observation(entity_id);
 CREATE INDEX IF NOT EXISTS idx_observation_metric ON observation(metric);
-CREATE INDEX IF NOT EXISTS idx_derived_entity ON derived_fact(entity_id);
 CREATE INDEX IF NOT EXISTS idx_raw_acq_source ON raw_acquisition(source_id);
 CREATE INDEX IF NOT EXISTS idx_market_obs_record ON market_observation(source_record_id);
 CREATE INDEX IF NOT EXISTS idx_market_obs_time ON market_observation(observed_at);
@@ -402,10 +385,10 @@ def status():
     """Print database status."""
     conn = get_db()
     tables = ['raw_blob', 'raw_acquisition', 'source_record', 'observation',
-              'derived_fact', 'source_cursor', 'collector_run', 'market_observation',
+              'source_cursor', 'collector_run', 'market_observation', 'market_listing',
               'manufacturer', 'product_family', 'product_model', 'product_variant',
               'product_identifier', 'product_relation', 'product_spec_observation',
-              'market_listing', 'lifecycle_event', 'benchmark_observation',
+              'lifecycle_event', 'benchmark_observation',
               'robot_description', 'jev_decision']
     print('=== DATABASE STATUS ===')
     for t in tables:
