@@ -1,0 +1,169 @@
+# PowProducts — Product Universe
+
+# Robotics-first, curated ~50-100 models that bridge AI, robotics, homelab, mining, resale, repair.
+# Collectors create these lazily. This file is the reference list.
+
+robots:
+  # Arms
+  - name: UR5e
+    manufacturer: Universal Robots
+    product_class: robot_arm
+    family: e-Series
+    why: "Industry standard collaborative arm"
+  - name: UR10e
+    manufacturer: Universal Robots
+    product_class: robot_arm
+    family: e-Series
+    why: "Larger payload collaborative arm"
+  - name: FR3
+    manufacturer: Franka Robotics
+    product_class: robot_arm
+    why: "Research-grade force-controlled arm"
+  - name: Panda
+    manufacturer: Franka Emika
+    product_class: robot_arm
+    why: "Research arm (legacy, widely deployed)"
+  - name: iiwa 14
+    manufacturer: KUKA
+    product_class: robot_arm
+    why: "Industrial collaborative arm"
+  - name: xArm 7
+    manufacturer: UFACTORY
+    product_class: robot_arm
+    why: "Affordable 7-DOF arm"
+  - name: Lite 6
+    manufacturer: UFACTORY
+    product_class: robot_arm
+    why: "Lightweight educational arm"
+  - name: Z1
+    manufacturer: UNITREE Robotics
+    product_class: robot_arm
+    why: "Desktop robotic arm"
+  - name: Gen3
+    manufacturer: Kinova
+    product_class: robot_arm
+    why: "Lightweight research arm"
+
+  # Humanoids
+  - name: G1
+    manufacturer: UNITREE Robotics
+    product_class: humanoid
+    why: "Affordable humanoid platform"
+  - name: H1
+    manufacturer: UNITREE Robotics
+    product_class: humanoid
+    why: "Bipedal humanoid"
+  - name: Apollo
+    manufacturer: Apptronik
+    product_class: humanoid
+    why: "Industrial humanoid"
+
+  # Quadrupeds
+  - name: Go2
+    manufacturer: UNITREE Robotics
+    product_class: quadruped
+    why: "Affordable quadruped robot"
+  - name: ANYmal C
+    manufacturer: ANYbotics
+    product_class: quadruped
+    why: "Industrial inspection quadruped"
+  - name: Spot
+    manufacturer: Boston Dynamics
+    product_class: quadruped
+    why: "Reference quadruped platform"
+
+  # Mobile Manipulators
+  - name: Stretch
+    manufacturer: Hello Robot
+    product_class: mobile_manipulator
+    why: "Warehouse/mobile manipulation"
+
+  # End Effectors
+  - name: Robotiq 2F-85
+    manufacturer: Robotiq
+    product_class: gripper
+    why: "Industry standard parallel gripper"
+
+actuators:
+  - name: DYNAMIXEL XM430-W350
+    manufacturer: ROBOTIS
+    product_class: actuator
+    why: "Standard robotic actuator"
+  - name: DYNAMIXEL XM540-W270
+    manufacturer: ROBOTIS
+    product_class: actuator
+    why: "High-torque actuator"
+  - name: DYNAMIXEL XL430
+    manufacturer: ROBOTIS
+    product_class: actuator
+    why: "Entry-level smart actuator"
+
+compute:
+  - name: Jetson AGX Orin
+    manufacturer: NVIDIA
+    product_class: SBC
+    why: "Maximum edge AI, robot compute"
+  - name: Jetson Orin NX
+    manufacturer: NVIDIA
+    product_class: SBC
+    why: "Higher performance edge AI"
+  - name: Jetson Orin Nano
+    manufacturer: NVIDIA
+    product_class: SBC
+    why: "Entry-level edge AI"
+  - name: Raspberry Pi 5
+    manufacturer: Raspberry Pi
+    product_class: SBC
+    why: "Ubiquitous SBC"
+
+gpus:
+  - name: RTX 3090
+    manufacturer: NVIDIA
+    product_class: GPU
+    why: "Previous gen, mining/resale"
+  - name: RTX 4090
+    manufacturer: NVIDIA
+    product_class: GPU
+    why: "Current gen, AI/mining/resale"
+  - name: RTX 5090
+    manufacturer: NVIDIA
+    product_class: GPU
+    why: "Next gen flagship"
+  - name: A100 80GB
+    manufacturer: NVIDIA
+    product_class: GPU
+    why: "Data center AI"
+  - name: H100 PCIe
+    manufacturer: NVIDIA
+    product_class: GPU
+    why: "Data center AI"
+  - name: H100 SXM
+    manufacturer: NVIDIA
+    product_class: GPU
+    why: "Data center AI"
+  - name: H200
+    manufacturer: NVIDIA
+    product_class: GPU
+    why: "Data center AI"
+  - name: B200
+    manufacturer: NVIDIA
+    product_class: GPU
+    why: "Next gen data center"
+
+asics:
+  - name: Antminer S21
+    manufacturer: Bitmain
+    product_class: ASIC
+    why: "SHA-256 Bitcoin miner"
+  - name: Antminer S21 XP
+    manufacturer: Bitmain
+    product_class: ASIC
+    why: "High-efficiency Bitcoin miner"
+  - name: Antminer L7
+    manufacturer: Bitmain
+    product_class: ASIC
+    why: "Scrypt/Litecoin miner"
+  - name: Whatsminer M60
+    manufacturer: MicroBT
+    product_class: ASIC
+    why: "SHA-256 Bitcoin miner"
