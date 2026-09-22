@@ -16,19 +16,22 @@ def make_manufacturer_id(canonical_name: str) -> str:
     return hashlib.sha256(normalized.encode()).hexdigest()[:12]
 
 
-def make_product_id(manufacturer_id: str, model_number: str) -> str:
-    """Generate deterministic product model ID."""
-    raw = f'{manufacturer_id}:{model_number.strip().lower()}'
+def make_product_id(manufacturer_id: str, model_number: str) -> Optional[str]:
+    """Generate deterministic product model ID. Returns None if insufficient info."""
+    if not model_number or not model_number.strip():
+        return None
+    if not manufacturer_id or not manufacturer_id.strip():
+        return None
+    raw = f'{manufacturer_id.strip().lower()}:{model_number.strip().lower()}'
     return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
 
-def make_variant_id(product_id: str, sku: str = '', mpn: str = '') -> str:
-    """Generate deterministic variant ID. Prefers MPN over SKU."""
-    identifier = mpn.strip() if mpn else sku.strip()
-    if identifier:
-        raw = f'{product_id}:{identifier.lower()}'
-    else:
-        raw = product_id
+def make_variant_id(product_id: str, sku: str = '', mpn: str = '') -> Optional[str]:
+    """Generate deterministic variant ID. Returns None if no identifying evidence."""
+    identifier = mpn.strip() if mpn and mpn.strip() else sku.strip() if sku and sku.strip() else ''
+    if not identifier:
+        return None  # Never create variant without identifying evidence
+    raw = f'{product_id}:{identifier.lower()}'
     return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
 
@@ -56,10 +59,7 @@ def normalize_string(s: str) -> str:
 
 
 def resolve_manufacturer(name: str, aliases: dict = None) -> Optional[str]:
-    """Resolve a manufacturer name to its canonical ID.
-
-    aliases: dict mapping alias -> manufacturer_id
-    """
+    """Resolve a manufacturer name to its canonical ID."""
     if not aliases:
         return None
     normalized = normalize_string(name)

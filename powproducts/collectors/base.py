@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from typing import Optional
 from powproducts.shared.persist import (
     get_db, store_raw, store_acquisition, insert_source_record,
-    get_cursor, set_cursor, log_run, persist_health,
+    get_cursor, set_cursor, log_run, persist_health, check_source_rights,
     InsertResult, RawStoreResult, Acquisition
 )
 
@@ -28,7 +28,14 @@ class CollectorResult:
         self.errors = []
         self.started_at = datetime.now(timezone.utc).isoformat()
         self.finished_at = None
-        self.acquisitions = []  # list of Acquisition objects from this run
+        self.acquisitions = []
+        # HTTP request counters
+        self.requests_attempted = 0
+        self.requests_200 = 0
+        self.requests_403 = 0
+        self.requests_404 = 0
+        self.requests_429 = 0
+        self.requests_failed = 0
 
 
 class BaseCollector:
@@ -36,21 +43,23 @@ class BaseCollector:
     DATASET = ''
     PARSER_ID = ''
     PARSER_VERSION = '1.0.0'
+    RIGHTS_STATUS = 'terms_review'  # Override in subclass
 
     def fetch(self) -> Optional[bytes]:
-        """Fetch raw data. Override in subclasses.
-
-        For multi-request collectors, return aggregated bytes.
-        Individual acquisitions are tracked via _fetch_url().
-        """
+        """Fetch raw data. Override in subclasses."""
         raise NotImplementedError
 
     def parse(self, raw_content: bytes, raw_hash: str, result: CollectorResult):
-        """Parse raw content and mutate `result` with counts.
-
-        Subclasses MUST mutate the passed-in result, NOT return a new one.
-        """
+        """Parse raw content and mutate `result` with counts."""
         raise NotImplementedError
+
+    def _check_rights(self) -> bool:
+        """Check if this source is allowed to run in production."""
+        rights = check_source_rights(self.SOURCE_ID)
+        if not rights['allowed']:
+            print(f'  BLOCKED: {rights.get("reason", rights["status"])}')
+            return False
+        return True
 
     def _fetch_url(self, url: str, max_retries: int = 3, timeout: int = 30,
                    headers: dict = None) -> Optional[Acquisition]:
@@ -65,14 +74,13 @@ class BaseCollector:
 
         for attempt in range(max_retries):
             try:
+                self.requests_attempted += 1
                 resp = requests.get(url, timeout=timeout, headers=merged)
 
-                if resp.status_code in (200, 404, 403):
-                    # Store the raw response as its own blob
+                if resp.status_code == 200:
+                    self.requests_200 += 1
                     content = resp.content
                     raw_result = store_raw(content, self.SOURCE_ID)
-
-                    # Store acquisition receipt
                     acq = Acquisition(
                         content=content,
                         requested_url=url,
@@ -83,32 +91,36 @@ class BaseCollector:
                         last_modified=resp.headers.get('last-modified', ''),
                         content_length=len(content),
                     )
-
-                    # Persist the acquisition
-                    conn = get_db()
-                    cursor = conn.execute(
-                        "INSERT INTO raw_acquisition "
-                        "(source_id, dataset, retrieved_at, request_url, final_url, "
-                        "http_status, etag, last_modified, content_type, content_length, sha256) "
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (self.SOURCE_ID, self.DATASET,
-                         datetime.now(timezone.utc).isoformat(),
-                         url, acq.final_url, acq.status, acq.etag, acq.last_modified,
-                         acq.content_type, acq.content_length, raw_result.sha256)
+                    acquisition_id = store_acquisition(
+                        self.SOURCE_ID, self.DATASET, url, resp.status_code,
+                        raw_result.sha256, acq.content_type, acq.etag,
+                        acq.last_modified, acq.content_length, acq.final_url
                     )
-                    acquisition_id = cursor.lastrowid
-                    conn.commit()
-                    conn.close()
-
                     acq.sha256 = raw_result.sha256
                     acq.acquisition_id = acquisition_id
                     return acq
 
-                if resp.status_code == 429:
+                if resp.status_code == 403:
+                    self.requests_403 += 1
+                    # Store the 403 response as evidence
+                    store_acquisition(
+                        self.SOURCE_ID, self.DATASET, url, 403,
+                        hashlib.sha256(resp.content).hexdigest(),
+                        content_type=resp.headers.get('content-type', ''),
+                        content_length=len(resp.content)
+                    )
+                elif resp.status_code == 404:
+                    self.requests_404 += 1
+                elif resp.status_code == 429:
+                    self.requests_429 += 1
                     time.sleep(min(60, 2 ** (attempt + 2)))
+                    continue
                 else:
-                    time.sleep(2 ** attempt)
-            except Exception:
+                    self.requests_failed += 1
+
+                time.sleep(2 ** attempt)
+            except requests.exceptions.RequestException:
+                self.requests_failed += 1
                 time.sleep(2 ** attempt)
 
         return None
@@ -117,6 +129,17 @@ class BaseCollector:
         result = CollectorResult()
         print(f'{self.SOURCE_ID} — {self.DATASET}')
         print('=' * 50)
+
+        # Rights gate
+        if not self._check_rights():
+            result.errors.append('rights_blocked')
+            result.finished_at = datetime.now(timezone.utc).isoformat()
+            log_run(
+                self.SOURCE_ID, 'blocked',
+                started_at=result.started_at, finished_at=result.finished_at,
+                error='rights_blocked'
+            )
+            return result
 
         try:
             print('  Fetching...')
@@ -132,7 +155,6 @@ class BaseCollector:
             raw_hash = raw_result.sha256
             result.raw_new = 1 if raw_result.inserted else 0
 
-            # Store the batch acquisition
             store_acquisition(
                 self.SOURCE_ID, self.DATASET,
                 url=f'{self.SOURCE_ID}://batch',
@@ -145,6 +167,8 @@ class BaseCollector:
             print('  Parsing...')
             self.parse(raw_content, raw_hash, result)
             print(f'  New: {result.records_new} | Unchanged: {result.records_unchanged} | Changed: {result.records_changed}')
+            if result.records_invalid > 0:
+                print(f'  Invalid: {result.records_invalid}')
 
         except Exception as e:
             result.errors.append(str(e))
@@ -158,10 +182,15 @@ class BaseCollector:
                 result.raw_fetched, result.raw_new,
                 result.records_new, result.records_unchanged, result.records_changed,
                 result.records_invalid,
-                json.dumps(result.errors) if result.errors else None,
-                result.started_at, result.finished_at,
+                requests_attempted=self.requests_attempted,
+                requests_200=self.requests_200,
+                requests_403=self.requests_403,
+                requests_404=self.requests_404,
+                requests_429=self.requests_429,
+                requests_failed=self.requests_failed,
+                error=json.dumps(result.errors) if result.errors else None,
+                started_at=result.started_at, finished_at=result.finished_at,
             )
-            # Persist health for monitoring
             from powproducts.layer1.health import health_from_run_result
             health = health_from_run_result(self.SOURCE_ID, self.SOURCE_ID, result)
             persist_health(self.SOURCE_ID, health.to_dict())
